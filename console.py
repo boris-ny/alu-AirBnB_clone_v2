@@ -73,8 +73,8 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] == '{' and pline[-1] =='}'\
-                            and type(eval(pline)) is dict:
+                    if pline[0] == '{' and pline[-1] == '}'\
+                            and type(eval(pline)) == dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -112,52 +112,48 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         """ Overrides the emptyline method of CMD """
         pass
-
+    
     def do_create(self, args):
-        """Create an object of any class with given parameters"""
-        if not args:
+        """ Create an object of any class"""
+        if len(args) < 1:
             print("** class name missing **")
             return
-    
-        params = args.split()
-        class_name = params[0]
-        if class_name not in HBNBCommand.classes:
+        # convert the args to a list
+        args_list = args.split()
+        params = args_list[1:]
+
+        # the 1st element of the list is the class name
+        class_name = args_list[0]
+        print(class_name)
+        if class_name not in self.classes:
             print("** class doesn't exist **")
             return
-    
-        # Remove the class name from the parameters
-        params = params[1:]
-    
-        # Parse the parameters and build a dictionary of attribute-value pairs
-        kwargs = {}
+        new_instance = self.classes[class_name]()
         for param in params:
-            if "=" in param:
-                key, value = param.split("=", 1)
-                if value.startswith('"') and value.endswith('"'):
-                    value = value[1:-1].replace("_", " ")
-                elif "." in value:
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        print(f"Invalid parameter: {param}. Skipping.")
-                        continue
-                else:
-                    try:
-                        value = int(value)
-                    except ValueError:
-                        print(f"Invalid parameter: {param}. Skipping.")
-                        continue
-                kwargs[key] = value
+            if "=" not in param:
+                continue
+            key, value = param.split('=')
+            value = value.replace('_', ' ')
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace('\\"', '"')
+            elif '.' in value:
+                try:
+                    value = float(value)
+                except ValueError:
+                    continue
             else:
-                print(f"Invalid parameter: {param}. Skipping.")
-    
-        # Create an instance of the specified class with the given parameters
-        new_instance = HBNBCommand.classes[class_name](**kwargs)
-        storage.save()
+                try:
+                    value = int(value)
+                except ValueError:
+                    continue
+
+            if value is not None and value != "" and hasattr(
+                    new_instance, key):
+                setattr(new_instance, key, value)
+
         print(new_instance.id)
-        storage.save()
-
-
+        new_instance.save()
+    
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")

@@ -35,23 +35,15 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """
-        Query on the current database session of all objects
-        of the given class.
-        """
-        if cls is None:
-            objs = self.__session.query(State).all()
-            objs.extend(self.__session.query(City).all())
-            objs.extend(self.__session.query(User).all())
-            objs.extend(self.__session.query(Place).all())
-            objs.extend(self.__session.query(Amenity).all())
-            objs.extend(self.__session.query(Review).all())
+        """Query all objects of a class"""
+        objs = []
+        if cls is not None:
+            objs = self.__session.query(cls).all()
         else:
-            if type(cls) == str:
-                cls = eval(cls)
-            objs = self.__session.query(cls)
-        return {"{}.{}".format(type(obj).__name__, obj.id): obj for obj in
-                objs}
+            classes = [State, City, User, Place, Review, Amenity]
+            for cls in classes:
+                objs += self.__session.query(cls).all()
+        return {"{}.{}".format(type(obj).__name__, obj.id): obj for obj in objs}
 
     def new(self, obj):
         """Add obj to the current database session."""
@@ -73,7 +65,3 @@ class DBStorage:
                                        expire_on_commit=False)
         Session = scoped_session(session_factory)
         self.__session = Session()
-
-    def close(self):
-        '''Close the session.'''
-        self.__session.close()

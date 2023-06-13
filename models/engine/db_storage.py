@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 """Defines the database storage engine."""
 from os import getenv
-from models.base_model import BaseModel, Base
+from models.base_model import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.orm import relationship, backref
 from models.user import User
 from models.state import State
 from models.city import City
@@ -36,14 +35,27 @@ class DBStorage:
 
     def all(self, cls=None):
         """Query all objects of a class"""
-        objs = []
-        if cls is not None:
-            objs = self.__session.query(cls).all()
-        else:
-            classes = [State, City, User, Place, Review, Amenity]
+        classes = {
+            'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
+        obj_dict = {}
+        if cls is not None and cls in classes:
+            class_objects = self.__session.query(classes[cls]).all()
+            for obj in class_objects:
+                key = obj.__class__.__name__ + "." + obj.id
+                obj_dict[key] = obj
+
+        if cls is None:
             for cls in classes:
-                objs += self.__session.query(cls).all()
-        return {"{}.{}".format(type(obj).__name__, obj.id): obj for obj in objs}
+                class_objects = self.__session.query(classes[cls]).all()
+                for obj in class_objects:
+                    key = obj.__class__.__name__ + "." + obj.id
+                    obj_dict[key] = obj
+
+        return obj_dict
+
 
     def new(self, obj):
         """Add obj to the current database session."""

@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, DateTime
 
+Base = declarative_base()
 
 class BaseModel:
     """A base class for all hbnb models"""
@@ -55,3 +56,5 @@ class BaseModel:
         '''delete the current instance from the storage'''
         from models import storage
         storage.delete(self)
+
+

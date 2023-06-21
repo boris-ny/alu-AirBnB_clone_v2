@@ -29,4 +29,5 @@ def do_deploy(archive_path):
         return False
 
 # Run the script like this:
-# $ fab -f 2-do_deploy_web_static.py do_deploy:archive_path=versions/file_name.tgz
+# $ fab -f 2-do_deploy_web_static.py
+# do_deploy:archive_path=versions/file_name.tgz

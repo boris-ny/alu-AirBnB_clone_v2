@@ -5,18 +5,18 @@ from fabric.api import *
 import os
 import re
 
-env.hosts = ["54.226.54.247","18.205.246.150"]
+env.hosts = ["54.226.54.247", "18.205.246.150"]
 env.user = "ubuntu"
 env.key = "~/.ssh/id_rsa"
 
 
-def do_deploy(file_name):
+def do_deploy(archive_path):
     """Function to distribute an archive to your web servers"""
-    if not os.path.exists(file_name):
+    if not os.path.exists(archive_path):
         return False
 
-    put(file_name, "/tmp/")
-    filename = re.search(r'[^/]+$', file_name).group(0)
+    put(archive_path, "/tmp/")
+    filename = re.search(r'[^/]+$', archive_path).group(0)
     folder = "/data/web_static/releases/{}/".format(os.path.splitext(
         filename)[0])
     run("mkdir -p {}".format(folder))
